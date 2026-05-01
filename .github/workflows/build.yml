@@ -9,25 +9,35 @@ jobs:
     runs-on: macos-latest
 
     steps:
-      - name: Checkout repo
+      - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Build archive
+      - name: Show Xcode
+        run: xcodebuild -version
+
+      - name: Build app
         run: |
-          xcodebuild clean archive \
+          xcodebuild clean build \
           -scheme MangaPlayer \
-          -archivePath build/MangaPlayer.xcarchive \
-          -sdk iphoneos
+          -sdk iphoneos \
+          CODE_SIGNING_ALLOWED=NO
+
+      - name: Archive
+        run: |
+          xcodebuild archive \
+          -scheme MangaPlayer \
+          -archivePath build/app.xcarchive \
+          CODE_SIGNING_ALLOWED=NO
 
       - name: Export IPA
         run: |
           xcodebuild -exportArchive \
-          -archivePath build/MangaPlayer.xcarchive \
+          -archivePath build/app.xcarchive \
           -exportPath build \
-          -exportOptionsPlist ExportOptions.plist
+          -exportOptionsPlist Resources/ExportOptions.plist
 
       - name: Upload IPA
         uses: actions/upload-artifact@v4
         with:
-          name: MangaPlayer-IPA
+          name: ipa
           path: build/*.ipa
