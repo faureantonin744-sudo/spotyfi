@@ -1,0 +1,33 @@
+name: Build iOS IPA
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Build archive
+        run: |
+          xcodebuild clean archive \
+          -scheme MangaPlayer \
+          -archivePath build/MangaPlayer.xcarchive \
+          -sdk iphoneos
+
+      - name: Export IPA
+        run: |
+          xcodebuild -exportArchive \
+          -archivePath build/MangaPlayer.xcarchive \
+          -exportPath build \
+          -exportOptionsPlist ExportOptions.plist
+
+      - name: Upload IPA
+        uses: actions/upload-artifact@v4
+        with:
+          name: MangaPlayer-IPA
+          path: build/*.ipa
